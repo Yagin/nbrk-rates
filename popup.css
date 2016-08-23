@@ -1,0 +1,27 @@
+body
+{
+   min-width: 200px;
+   width: 450px;
+   height: 50px;
+   min-height: 50px;
+   max-height: 50px;
+}
+
+tr.second {
+  background-color: #eff;
+  border-bottom: 1px solid #ccc;
+  padding: 0.1em 0.6em;
+}
+
+tr.first {
+  background-color: #efefdf;
+  border-bottom: 1px solid #ccc;
+  padding: 0.1em 0.6em;
+}
+
+thead th {
+  text-align: left;
+  padding-right: 1em;
+  border-bottom: 3px solid #ccc;
+}
+
