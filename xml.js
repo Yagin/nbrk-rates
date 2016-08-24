@@ -1,82 +1,79 @@
 var XML = new Object(); 
 
-// пустой документ
+// РїСѓСЃС‚РѕР№ РґРѕРєСѓРјРµРЅС‚
 XML.newDocument=function (rootTagName, namespaceURL) {
+  if(document.implementation && // FF СЃР»РµРґСѓРµС‚ W3C СЃС‚Р°РЅРґР°СЂС‚Сѓ
+    document.implementation.createDocument){  
+      return document.implementation.createDocument("","",null);      
+    } else { // IE  
+      var doc = new ActiveXObject("Microsoft.XmlDom");
 
-if(document.implementation && // FF следует W3C стандарту
-	document.implementation.createDocument){	
-	return document.implementation.createDocument("","",null);			
-}
-else { // IE  
-var doc = new ActiveXObject("Microsoft.XmlDom"); 
+      // РїСЂРѕРІРµСЂСЏРµРј, СѓРєР°Р·Р°РЅРѕ Р»Рё РІ РєРѕСЂРЅРµРІРѕРј СЌР»РµРјРµРЅС‚Рµ
+      // РёСЃРїРѕР»СЊР·СѓРµРјРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјРµРЅ 
+      if (rootTagName) {   
+        var root; // РєРѕСЂРЅРµРІРѕР№ СЌР»РµРјРµРЅС‚Р°
+        var pref = ""; // РїСЂРµС„РёРєСЃ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° РёРјРµРЅ 
+        var lname = rootTagName; // Р»РѕРєР°Р»СЊРЅРѕРµ РёРјСЏ
+        var p = rootTagName.indexOf(":");
+        if (p != -1) {
+          pref = rootTagName.substring(0, p);
+          lname = rootTagName.substring(p+1);
+        }
 
-// проверяем, указано ли в корневом элементе
-// используемое пространство имен 
-if (rootTagName) {   
-  var root; // корневой элемента
-  var pref = ""; // префикс пространства имен 
-  var lname = rootTagName; // локальное имя
-
-  var p = rootTagName.indexOf(":");   
-  if (p != -1) { 
-     pref = rootTagName.substring(0, p); 
-     lname = rootTagName.substring(p+1); 
-  } 
-
-// если урл пространства имен задан, а префикс нет
-// назначаем префикс по умолчанию
-  if (namespaceURL) {
-	if (!pref) pref = "a0"; // как в FF 
-  } 
-  else pref = ""; // иначе сбрасываем префикс
+        // РµСЃР»Рё СѓСЂР» РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° РёРјРµРЅ Р·Р°РґР°РЅ, Р° РїСЂРµС„РёРєСЃ РЅРµС‚
+        // РЅР°Р·РЅР°С‡Р°РµРј РїСЂРµС„РёРєСЃ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+        if (namespaceURL) {
+          if (!pref) pref = "a0"; // РєР°Рє РІ FF
+        } else
+          pref = ""; // РёРЅР°С‡Рµ СЃР±СЂР°СЃС‹РІР°РµРј РїСЂРµС„РёРєСЃ
   
-  // создаем корневой элемент с учетом 
-  // указанного пространства имен
-  if(pref)  
-	  root="<"+lname+">";
-  else 
-	  root="<"+pref+":"+lname+ 
-	     "xlmns:"+pref+"='"+namespaceURL+"'/>"; 
-  
-  doc.loadXML(root);  
-} 
-return doc; 
-}}; 
+        // СЃРѕР·РґР°РµРј РєРѕСЂРЅРµРІРѕР№ СЌР»РµРјРµРЅС‚ СЃ СѓС‡РµС‚РѕРј 
+        // СѓРєР°Р·Р°РЅРЅРѕРіРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° РёРјРµРЅ
+        if(pref)  
+          root="<"+lname+">";
+        else 
+          root="<"+pref+":"+lname+"xlmns:"+pref+"='"+namespaceURL+"'/>"; 
 
-// синхронная загрузка документа
-XML.load=function(url) { 
-var doc = XML.newDocument(); 
-doc.async = false;   
-doc.load(url);       
-return doc;          
-}; 
+        doc.loadXML(root);
+      }
+      return doc;
+    }
+  }; 
 
-// асинхронная загрузка 
-XML.loadAsync = function(url, callback) { 
-var doc = XML.newDocument(); 
 
-if (document.implementation && // в FF используем событие onload 
-		document.implementation.createDocument) { 
-doc.onload = function() { callback(doc); }; 
-} 	 
-else {// IE как в XMLHttpRequest 
-doc.onreadystatechange = function() { 
-   if (doc.readyState == 4) 
-	  callback(doc); 
-};} 
+// СЃРёРЅС…СЂРѕРЅРЅР°СЏ Р·Р°РіСЂСѓР·РєР° РґРѕРєСѓРјРµРЅС‚Р°
+XML.load=function(url) {
+  var doc = XML.newDocument();
+  doc.async = false;
+  doc.load(url);
+  return doc;
+};
+
+// Р°СЃРёРЅС…СЂРѕРЅРЅР°СЏ Р·Р°РіСЂСѓР·РєР° 
+XML.loadAsync = function(url, callback) {
+  var doc = XML.newDocument();
+
+  if (document.implementation && // РІ FF РёСЃРїРѕР»СЊР·СѓРµРј СЃРѕР±С‹С‚РёРµ onload
+      document.implementation.createDocument) {
+    doc.onload = function() { callback(doc); };
+  } else {// IE РєР°Рє РІ XMLHttpRequest
+    doc.onreadystatechange = function() {
+      if (doc.readyState == 4)
+        callback(doc);
+    };
+  } 
  
-xmldoc.load(url); 
+  xmldoc.load(url); 
 }; 
 
-// разбор xml строки 
+// СЂР°Р·Р±РѕСЂ xml СЃС‚СЂРѕРєРё
 XML.parse = function(text) {
-if (window.DOMParser) { // FF       
-    return (new DOMParser()). 
-          parseFromString(text, "text/xml"); // или "application/xml" 
-}
-else if (ActiveXObject) {// IE    
-    var doc = XML.newDocument(); 
+  if (window.DOMParser) { // FF
+    return (new DOMParser()).
+    parseFromString(text, "text/xml"); // РёР»Рё "application/xml"
+  } else if (ActiveXObject) {// IE
+    var doc = XML.newDocument();
     doc.loadXML(text);           
     return doc;                  
-}
+  }
 };
